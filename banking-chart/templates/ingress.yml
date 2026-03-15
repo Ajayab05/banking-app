@@ -1,16 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: banking-app-ingress
+  name: banking-ingress
   annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/healthcheck-path: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
-  ingressClassName: alb
   rules:
   - http:
       paths:
+
       - path: /
         pathType: Prefix
         backend:
@@ -18,8 +16,9 @@ spec:
             name: frontend-service
             port:
               number: 80
-      - path: /api
-        pathType: Prefix
+
+      - path: /api(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: backend-service
