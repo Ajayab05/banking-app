@@ -2,7 +2,6 @@ package com.bank.app.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.bank.app.model.Account;
@@ -13,8 +12,11 @@ import com.bank.app.repository.AccountRepository;
 @CrossOrigin
 public class AccountController {
 
- @Autowired
- private AccountRepository repo;
+ private final AccountRepository repo;
+
+ public AccountController(AccountRepository repo){
+  this.repo = repo;
+ }
 
  @GetMapping
  public List<Account> getAccounts(){
