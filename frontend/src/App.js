@@ -8,12 +8,12 @@ function App() {
  const [balance,setBalance] = useState("");
 
  const loadAccounts = async () => {
-  const res = await axios.get("/accounts");
+  const res = await axios.get("/api/accounts");
   setAccounts(res.data);
  }
 
  const createAccount = async () => {
-  await axios.post("/accounts",{
+  await axios.post("/api/accounts",{
    name:name,
    balance:balance
   });
