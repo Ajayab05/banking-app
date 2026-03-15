@@ -9,7 +9,7 @@ import com.bank.app.model.Account;
 import com.bank.app.repository.AccountRepository;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 @CrossOrigin
 public class AccountController {
 
