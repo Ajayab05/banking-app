@@ -4,7 +4,7 @@ metadata:
   name: backend-service
 spec:
   selector:
-    app: backend
+    app: banking-backend
   ports:
     - port: 8080
       targetPort: 8080
@@ -17,7 +17,7 @@ metadata:
   name: frontend-service
 spec:
   selector:
-    app: frontend
+    app: banking-frontend
   ports:
     - port: 80
       targetPort: 80
