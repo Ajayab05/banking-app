@@ -1,16 +1,41 @@
-containers:
-  - name: backend
-    image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
-    imagePullPolicy: Always
-    ports:
-      - containerPort: {{ .Values.backend.port }}
-
-
-
-
-containers:
-  - name: frontend
-    image: "{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}"
-    imagePullPolicy: Always
-    ports:
-      - containerPort: {{ .Values.frontend.port }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.backend.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
