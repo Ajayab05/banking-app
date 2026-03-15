@@ -1,11 +1,9 @@
 backend:
-  image: banking-backend
+  image: ajayab05/banking-backend
   tag: latest
-  port: 8081
+  port: 8080
 
 frontend:
-  image: banking-frontend
+  image: ajayab05/banking-frontend
   tag: latest
-  port: 3000
-
-replicaCount: 2
+  port: 80
