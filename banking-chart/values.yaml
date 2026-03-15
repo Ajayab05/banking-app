@@ -7,3 +7,17 @@ frontend:
   image: ajayab05/banking-frontend
   tag: latest
   port: 80
+
+service:
+  backend:
+    type: ClusterIP
+    port: 8080
+
+  frontend:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: true
+  className: alb
+  scheme: internet-facing
