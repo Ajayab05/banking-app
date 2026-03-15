@@ -1,0 +1,11 @@
+backend:
+  image: banking-backend
+  tag: latest
+  port: 8081
+
+frontend:
+  image: banking-frontend
+  tag: latest
+  port: 3000
+
+replicaCount: 2
