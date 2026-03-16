@@ -21,3 +21,8 @@ ingress:
   enabled: true
   className: alb
   scheme: internet-facing
+
+
+secrets:
+  dbUser: admin
+  dbPassword: admin123
