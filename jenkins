@@ -1,0 +1,156 @@
+pipeline {
+
+agent any
+
+tools {
+    maven 'maven'
+}
+
+options {
+    timestamps()
+    timeout(time: 40, unit: 'MINUTES')
+}
+
+environment {
+
+DOCKERHUB_USER = "ajayab05"
+
+BACKEND_IMAGE = "${DOCKERHUB_USER}/banking-backend"
+FRONTEND_IMAGE = "${DOCKERHUB_USER}/banking-frontend"
+
+AWS_REGION = "us-east-2"
+CLUSTER_NAME = "education-eks-JnQUMr5N"
+
+}
+
+stages {
+
+stage('Checkout') {
+    steps {
+        git branch: 'main', url: 'https://github.com/Ajayab05/banking-app.git'
+    }
+}
+
+stage('Secrets Scan (GitLeaks)') {
+    steps {
+        sh '''
+        docker run --rm -v "$WORKSPACE:/repo" zricethezav/gitleaks detect --source /repo
+        '''
+    }
+}
+
+stage('Build Backend') {
+    steps {
+        dir('backend') {
+            sh 'mvn clean package -DskipTests'
+        }
+    }
+}
+
+stage('Unit Tests') {
+    steps {
+        dir('backend') {
+            sh 'mvn test'
+        }
+    }
+}
+
+stage('SAST - SonarQube') {
+    steps {
+        dir('backend') {
+            withSonarQubeEnv('sonar-server') {
+                sh 'mvn clean verify sonar:sonar'
+            }
+        }
+    }
+}
+
+stage('Quality Gate') {
+    steps {
+        timeout(time: 5, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
+}
+
+stage('Docker Build') {
+    steps {
+        sh '''
+        docker build -t $BACKEND_IMAGE:$BUILD_NUMBER ./backend
+        docker build -t $FRONTEND_IMAGE:$BUILD_NUMBER ./frontend
+        '''
+    }
+}
+
+stage('Container Scan - Trivy') {
+    steps {
+        sh '''
+        trivy image --exit-code 0 --severity CRITICAL,HIGH $BACKEND_IMAGE:$BUILD_NUMBER
+        trivy image --exit-code 0 --severity CRITICAL,HIGH $FRONTEND_IMAGE:$BUILD_NUMBER
+        '''
+    }
+}
+
+stage('Login to DockerHub') {
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'docker-cred',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
+            sh '''
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            '''
+        }
+    }
+}
+
+stage('Push Images to DockerHub') {
+    steps {
+        sh '''
+        docker push $BACKEND_IMAGE:$BUILD_NUMBER
+        docker push $FRONTEND_IMAGE:$BUILD_NUMBER
+        '''
+    }
+}
+
+stage('Deploy to EKS') {
+    steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-key'
+        ]]) {
+            sh '''
+aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+helm upgrade --install banking-app ./banking-chart \
+--set backend.tag=$BUILD_NUMBER \
+--set frontend.tag=$BUILD_NUMBER
+'''
+        }
+    }
+}
+
+stage('Kubernetes Security Scan (Kubescape)') {
+    steps {
+        sh '''
+        docker run --rm -v "$HOME/.kube:/root/.kube" kubescape/kubescape scan framework nsa
+        '''
+    }
+}
+
+}
+
+post {
+
+success {
+    echo "Pipeline completed successfully 🚀"
+}
+
+failure {
+    echo "Security gate failed ❌"
+}
+
+}
+
+}
