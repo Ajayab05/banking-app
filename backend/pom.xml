@@ -8,11 +8,13 @@
 <groupId>com.bank</groupId>
 <artifactId>banking</artifactId>
 <version>1.0</version>
+<name>banking-app</name>
 
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.2.0</version>
+    <relativePath/>
 </parent>
 
 <properties>
@@ -21,19 +23,23 @@
 
 <dependencies>
 
+    <!-- Spring Boot Web -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
+    <!-- JPA -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
+    <!-- MySQL Driver -->
     <dependency>
         <groupId>com.mysql</groupId>
         <artifactId>mysql-connector-j</artifactId>
+        <scope>runtime</scope>
     </dependency>
 
 </dependencies>
