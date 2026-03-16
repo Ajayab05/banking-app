@@ -6,20 +6,52 @@ metadata:
     app: banking-backend
 spec:
   replicas: 6
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 2
+
   selector:
     matchLabels:
       app: banking-backend
+
   template:
     metadata:
       labels:
         app: banking-backend
+
     spec:
       containers:
         - name: backend
           image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
           imagePullPolicy: Always
+
           ports:
             - containerPort: {{ .Values.backend.port }}
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.backend.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.backend.port }}
+            initialDelaySeconds: 40
+            periodSeconds: 20
 
 ---
 apiVersion: apps/v1
@@ -30,47 +62,35 @@ metadata:
     app: banking-frontend
 spec:
   replicas: 6
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 2
+
   selector:
     matchLabels:
       app: banking-frontend
+
   template:
     metadata:
       labels:
         app: banking-frontend
+
     spec:
       containers:
         - name: frontend
           image: "{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}"
           imagePullPolicy: Always
+
           ports:
             - containerPort: {{ .Values.frontend.port }}
--------------------
 
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 2
----------------------------------------
-resources:
-  requests:
-    cpu: "200m"
-    memory: "256Mi"
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
------------------------------------------
-
-readinessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
-  initialDelaySeconds: 20
-  periodSeconds: 10
-
-livenessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
-  initialDelaySeconds: 40
-  periodSeconds: 20
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
