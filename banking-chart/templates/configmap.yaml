@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: banking-config
+data:
+  DB_HOST: database-1.c5u4mk4429wk.us-east-2.rds.amazonaws.com
+  DB_PORT: "3306"
+  LOG_LEVEL: INFO
