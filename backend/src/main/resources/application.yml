@@ -1,12 +1,13 @@
 spring:
   datasource:
-    url: jdbc:mysql://database-1.c5u4mk4429wk.us-east-2.rds.amazonaws.com:3306/banking
+    url: jdbc:mysql://database-1.c5u4mk4429wk.us-east-2.rds.amazonaws.com:3306/bankdb
     username: admin
     password: admin123
 
   jpa:
     hibernate:
       ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
 
 server:
